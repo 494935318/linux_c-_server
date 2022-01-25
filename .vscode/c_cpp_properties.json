@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/include/",
+                "${workspaceFolder}/../libevent-2.1.12-stable/include/"
+            ],
+            "browse": {
+                "path": [  "${workspaceRoot}",
+                    "${workspaceFolder}/../libevent-2.1.12-stable/"]
+            },
+            "defines": [],
+            "compilerPath": "/usr/bin/g++-9",
+            "cStandard": "gnu17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

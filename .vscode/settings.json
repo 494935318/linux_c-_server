@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "deque": "cpp",
+        "iostream": "cpp",
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "bitset": "cpp",
+        "functional": "cpp",
+        "istream": "cpp",
+        "streambuf": "cpp"
+    }
+}
