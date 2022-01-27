@@ -4,8 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/include/",
-                "${workspaceFolder}/../libevent-2.1.12-stable/include/"
+                "${workspaceFolder}/../libevent-2.1.12-stable/include/",
+                "${workspaceFolder}/include/"
             ],
             "browse": {
                 "path": [  "${workspaceRoot}",

@@ -6,7 +6,8 @@
 			"label": "C/C++: cpp 生成活动文件",
 			"command": "/usr/bin/g++",
 			"args": [
-				"-O2",
+				// "-O2",
+				"-pthread",
 				"-fdiagnostics-color=always",
 				"-g",
 				"${workspaceFolder}/*/*.cpp",

@@ -131,6 +131,10 @@ void addfd(int epollfd ,int fd, bool enable_et=false,bool oneshot=false){
     epoll_ctl(epollfd,EPOLL_CTL_ADD,fd,&event);
     set_nonblock(fd);
 }
+void delfd(int epollfd,int fd){
+    epoll_ctl(epollfd,EPOLL_CTL_DEL,fd,NULL);
+    close(fd);
+}
 void reset_oneshot(int epollfd,int fd){
     epoll_event event;
     event.data.fd=fd;

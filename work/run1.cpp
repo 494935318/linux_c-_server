@@ -1,6 +1,7 @@
-#include"all_include.h"
-#include"utils.h"
-int main (int argc,char *argv[]){
+#include<utils.h>
+#include<locker.h>
+int run1 (int argc,char *argv[]){
+    
     const char *ip="127.0.0.1";
     openlog("run1",LOG_PID|LOG_CONS,LOG_USER);
     setlogmask(LOG_UPTO(LOG_DEBUG));
@@ -28,6 +29,30 @@ int main (int argc,char *argv[]){
     // print_getsockname(sock_tmp);
     // print_getpeername(sock_tmp);
     cout<<"ok"<<endl;
+    
+    return 0;
+}
+count_down_latch a(1);
+void * call(void *){
+    sleep(1);
+    a.count_down();
+    return nullptr;
+}
+void test(int i){
+    cout<<i<<endl;
+}
+int main(){
+    pthread_t t;
+    pthread_create(&t,NULL,call,NULL);
+    auto c=bind(&test,1);
+    c();
+    cout<<time(NULL)<<endl;
+    a.wait();
+    cout<<time(NULL)<<endl;
+    return 0;
+    
+
+    
 }
 
 

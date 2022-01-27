@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ALL_INCLUD
 #define ALL_INCLUD0
 #include<sys/un.h>
