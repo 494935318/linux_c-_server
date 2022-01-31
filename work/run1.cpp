@@ -50,9 +50,6 @@ int main(){
     a.wait();
     cout<<time(NULL)<<endl;
     return 0;
-    
-
-    
 }
 
 

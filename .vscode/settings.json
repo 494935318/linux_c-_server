@@ -9,6 +9,13 @@
         "istream": "cpp",
         "streambuf": "cpp",
         "ostream": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "unordered_map": "cpp",
+        "map": "cpp",
+        "memory_resource": "cpp",
+        "algorithm": "cpp",
+        "memory": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp"
     }
 }

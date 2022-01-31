@@ -24,7 +24,7 @@ private:
     int m_thread_number;
     int m_max_requests;
     pthread_t *m_threads;
-    list<T *> m_workqueue;
+    list<T > m_workqueue;
     locker m_queuelocker;
     sem m_queuestat;
     bool m_stop;
@@ -82,7 +82,7 @@ void thread_pool<T>::run()
             m_queuelocker.unlock();
             continue;
         }
-        T* request=m_workqueue.front();
+        T request=m_workqueue.front();
         m_workqueue.pop_front();
         m_queuelocker.unlock();
         if(! request){

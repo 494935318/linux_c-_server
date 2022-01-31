@@ -121,7 +121,7 @@ int set_block(int in_fd){
 void addfd(int epollfd ,int fd, bool enable_et=false,bool oneshot=false){
     epoll_event event;
     event.data.fd=fd;
-    event.events=EPOLLIN;
+    event.events=EPOLLIN|EPOLLOUT;
     if(enable_et){
         event.events|=EPOLLET;
     }
@@ -131,7 +131,7 @@ void addfd(int epollfd ,int fd, bool enable_et=false,bool oneshot=false){
     epoll_ctl(epollfd,EPOLL_CTL_ADD,fd,&event);
     set_nonblock(fd);
 }
-void delfd(int epollfd,int fd){
+void removefd(int epollfd,int fd){
     epoll_ctl(epollfd,EPOLL_CTL_DEL,fd,NULL);
     close(fd);
 }
