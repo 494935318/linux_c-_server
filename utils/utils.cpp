@@ -16,6 +16,7 @@ sockaddr *get_tcp_address(const char *ip, int port, bool ipv6 = false)
             return nullptr;
         };
         out->sin6_port = htons(port);
+        out->sin6_family=af;
         return (sockaddr *)out;
     }
     else
@@ -27,6 +28,7 @@ sockaddr *get_tcp_address(const char *ip, int port, bool ipv6 = false)
             return nullptr;
         };
         out->sin_port = htons(port);
+        out->sin_family=af;
         return (sockaddr *)out;
     }
 }
@@ -118,22 +120,40 @@ int set_block(int in_fd){
     fcntl(in_fd, F_SETFD, old_option & ~O_NONBLOCK);
     return old_option;
 }
-void addfd(int epollfd ,int fd, bool enable_et=false,bool oneshot=false){
+uint32_t  addfd(int epollfd ,int fd, int ctl,bool enable_et,bool oneshot)
+{
     epoll_event event;
     event.data.fd=fd;
-    event.events=EPOLLIN|EPOLLOUT;
+    event.events=0;
+    if(ctl&EVENT_IN)
+    event.events=EPOLLIN;
+    if(ctl&EVENT_OUT)
+    {
+    event.events|=EPOLLOUT;
+    }
     if(enable_et){
         event.events|=EPOLLET;
     }
     if(oneshot){
         event.events|=EPOLLONESHOT;
     }
+    else{
+        event.events&=~EPOLLONESHOT;
+    }
+    uint32_t tmp_out= event.events;
     epoll_ctl(epollfd,EPOLL_CTL_ADD,fd,&event);
     set_nonblock(fd);
+    return tmp_out;
+}
+void mode_fd(uint32_t ctl,int fd,int epollfd){
+ epoll_event event;
+    event.data.fd=fd;
+    event.events=ctl;
+    epoll_ctl(epollfd,EPOLL_CTL_MOD,fd,&event);
+
 }
 void removefd(int epollfd,int fd){
     epoll_ctl(epollfd,EPOLL_CTL_DEL,fd,NULL);
-    close(fd);
 }
 void reset_oneshot(int epollfd,int fd){
     epoll_event event;

@@ -1,5 +1,7 @@
-#include<utils.h>
-#include<locker.h>
+#include"utils.h"
+#include"locker.h"
+#include"event_loop.h"
+#include"TCP_Connect.h"
 int run1 (int argc,char *argv[]){
     
     const char *ip="127.0.0.1";
@@ -41,7 +43,7 @@ void * call(void *){
 void test(int i){
     cout<<i<<endl;
 }
-int main(){
+void  run2(){
     pthread_t t;
     pthread_create(&t,NULL,call,NULL);
     auto c=bind(&test,1);
@@ -49,7 +51,40 @@ int main(){
     cout<<time(NULL)<<endl;
     a.wait();
     cout<<time(NULL)<<endl;
-    return 0;
+    // return 0;
 }
+void run(event_loop&a){
+    static int i=1;
+    i++;
+    cout<<i<<endl;
+    timeval b;
+    b.tv_sec=i;
+    b.tv_usec=0;
+    a.runafter(b,bind(run,ref(a)));
+}
+void run3(){
+    static int i=1;
+    i++;
+    cout<<"the "<<i<<"th"<<endl;
+}
+int main(){
+event_loop a;
+timeval b;
+const char *ip="127.0.0.1";
+auto addr1=get_addr_ipv4(ip,3026);
+int sock_tmp=socket(AF_INET,SOCK_STREAM,0);
+int tmp=connect(sock_tmp,(sockaddr*)addr1,sizeof(*addr1));
 
+ if(tmp!=0){
+        cout<<"connect error"<<endl;
+        return 0;
+    }
+string out="123\n\r";
+ int n=send(sock_tmp,&out[0],5,0);
+ cout<<n<<endl;
+shared_ptr<TCP_Connect> tcp_client(new TCP_Connect( a,sock_tmp));
+tcp_client->work();
+tcp_client.reset();
+a.run();
+}
 

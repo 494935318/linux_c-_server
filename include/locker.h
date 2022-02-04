@@ -1,3 +1,6 @@
+#ifndef __LOCKER_H__
+#define __LOCKER_H__
+
 #include"utils.h"
 class lock_guard;
 class cond;
@@ -111,17 +114,16 @@ class block_queue:noncopyable
         locker l;
     public:
         void push(T a){
-            l.lock();
+           lock_guard tmp(l);
             q.push(a);
             s.post();
-            l.unlock();
+           
         }
         T get(){
             s.wait();
-            l.lock();
+            lock_guard tmp(l);
             T out=q.top();
             q.pop();
-            l.unlock();
             return out;
         }
 };
@@ -154,3 +156,5 @@ class count_down_latch:noncopyable
         locker a;
         cond b;
 };
+
+#endif // __LOCKER_H__

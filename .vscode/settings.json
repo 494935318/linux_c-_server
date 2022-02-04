@@ -16,6 +16,9 @@
         "algorithm": "cpp",
         "memory": "cpp",
         "tuple": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "optional": "cpp",
+        "numeric": "cpp",
+        "cmath": "cpp"
     }
 }

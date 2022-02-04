@@ -5,7 +5,7 @@ const int PRE_SIZE=8;
 namespace Buffer{
     
 class Buffer:noncopyable{
-    public: Buffer(int size=INIT_SIZE,int pre_size=PRE_SIZE):read_index(pre_size),write_index(pre_size),buff_(vector<char>(size,'/0')){
+    public: Buffer(int size=INIT_SIZE,int pre_size=PRE_SIZE):read_index(pre_size),write_index(pre_size),buff_(vector<char>(size,'\0')){
 
     }
     // 一次性读文文件
@@ -58,13 +58,15 @@ class Buffer:noncopyable{
     // 由send调用
     int append(string & a){
         append(&a[0],a.size());
-        
+        return a.size();
     }
     int append(char * a,int s){
         if(s>writeable_size()){
             resize(s);
         }
         copy(a,a+s,&buff_[write_index]);
+        write_index+=s;
+        return s;
     }
   // 在头部添加信息
     int prepend(string &a){
@@ -77,13 +79,29 @@ class Buffer:noncopyable{
     }
     // 发送一次消息
     int sendfd( int fd){
-        int num= write(fd,&buff_[read_index],readable_size());
+        cout<<buff_[read_index]<<endl;
+        string out(begin(),end());
+        int num= send(fd,&out[0],readable_size(),MSG_DONTWAIT|MSG_NOSIGNAL);
         read_index+=num;
         clear();
         return readable_size();
     }
     // 
-    
+    bool is_empty(){
+        return readable_size()==0;
+    }
+    char * begin(){
+        return &buff_[read_index];
+    }
+    char * end(){
+        return &buff_[write_index];
+    }
+    int readable_size(){
+        return write_index-read_index;
+    }
+    int prependable_size(){
+        return write_index;
+    }
     private:
     // 重置大小
     // 乘以二 , 前挪
@@ -92,7 +110,7 @@ class Buffer:noncopyable{
             int tmp=readable_size();
               copy(&buff_[read_index],&buff_[write_index],&buff_[PRE_SIZE]);
               read_index=PRE_SIZE;
-              write_index= read_index+readable_size();
+              write_index= read_index+tmp;
         }
         else{
              int pre_size=buff_.size();
@@ -102,13 +120,7 @@ class Buffer:noncopyable{
     }
     int writeable_size(){
         return buff_.size()-write_index;
-    }
-    int readable_size(){
-        return write_index-read_index;
-    }
-    int prependable_size(){
-        return write_index;
-    }
+    }  
     bool has_pre=false;
     vector<char> buff_;
     int read_index;

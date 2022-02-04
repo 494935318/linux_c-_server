@@ -99,6 +99,7 @@ HTTP_CODE parse_content(char *buffer, int &checked_index, CHECK_STATE &checkstat
             }
             break;
         }
+        
         case CHECK_STATE_HEADER:
         {
             retcode= parse_headers(tmp, holder);
@@ -122,6 +123,8 @@ HTTP_CODE parse_content(char *buffer, int &checked_index, CHECK_STATE &checkstat
     }
     else
     {
+       
+        
         return BAD_REQUEST;
     }
 }
