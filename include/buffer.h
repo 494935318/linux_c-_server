@@ -42,6 +42,11 @@ class Buffer:noncopyable{
         read_index+=k;
         clear();
     }
+    void retrieve_all(){
+        read_index=PRE_SIZE;
+        write_index=PRE_SIZE;
+        clear();
+    }
     // 收缩buff_大小
     void shrink(){
         buff_.resize(write_index>INIT_SIZE?write_index:INIT_SIZE);
@@ -56,11 +61,11 @@ class Buffer:noncopyable{
     }
     //末尾增加信息
     // 由send调用
-    int append(string & a){
+    int append(const string & a){
         append(&a[0],a.size());
         return a.size();
     }
-    int append(char * a,int s){
+    int append(const char * a,int s){
         if(s>writeable_size()){
             resize(s);
         }
@@ -69,22 +74,23 @@ class Buffer:noncopyable{
         return s;
     }
   // 在头部添加信息
-    int prepend(string &a){
+    int prepend(const string &a){
         prepend(&a[0],a.size());
     }
-    int prepend(char * a,int s){
+    int prepend(const char * a,int s){
         assert(s<=read_index);
         read_index-=s;
         copy(a,a+s,&buff_[read_index]);
     }
     // 发送一次消息
+    //返回剩下的大小
     int sendfd( int fd){
         cout<<buff_[read_index]<<endl;
-        string out(begin(),end());
-        int num= send(fd,&out[0],readable_size(),MSG_DONTWAIT|MSG_NOSIGNAL);
+      
+        int num= send(fd,&buff_[read_index],readable_size(),MSG_DONTWAIT|MSG_NOSIGNAL);
         read_index+=num;
         clear();
-        return readable_size();
+        return num;
     }
     // 
     bool is_empty(){

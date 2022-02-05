@@ -239,3 +239,11 @@ int recv_fd(int fd){
     return fd_to_read;
 
 }
+int current_thread_id(){
+    thread_local int a=-1;
+    if(a==-1){
+        a=gettid();
+        // a=0;
+    }
+    return a;
+}

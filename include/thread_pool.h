@@ -10,7 +10,7 @@ class thread_pool
 
 public:
     thread_pool(int thread_num = 8, int max_requests = 1000);
-    ~thread()
+    ~thread_pool()
     {
         delete[] m_threads;
         m_stop = true;
@@ -24,7 +24,7 @@ private:
     int m_thread_number;
     int m_max_requests;
     pthread_t *m_threads;
-    list<T > m_workqueue;
+    list<T*> m_workqueue;
     locker m_queuelocker;
     sem m_queuestat;
     bool m_stop;
@@ -38,28 +38,27 @@ thread_pool<T>::thread_pool(int thread_num, int max_requests) : m_thread_number(
     for (int i = 0; i < thread_num; ++i)
     {
         syslog(LOG_DEBUG, "create the %dth thread\n", i);
-        if (pthread_create(m_threads[i], NULL, worker, this) != 0)
+        if (pthread_create(&m_threads[i], NULL, worker, this) != 0)
         {
             delete[] m_threads;
             throw std::exception();
         }
         if (pthread_detach(m_threads[i]))
         {
-            delete[] = m_threads;
+            delete[] m_threads;
         }
     }
 }
 template <class T>
 bool thread_pool<T>::append(T *request)
-{
-    m_queuelocker.lock();
+{   {
+    lock_guard tmp(m_queuelocker);
     if (m_workqueue.size() > m_max_requests)
     {
-        m_queuelocker.unlock();
         return false;
     }
     m_workqueue.push_back(request);
-    m_queuelocker.unlock();
+    }
     m_queuestat.post();
     return true;
 }
@@ -74,17 +73,17 @@ template <class T>
 void thread_pool<T>::run()
 {
     while(! m_stop)
-    {
+    {   
         m_queuestat.wait();
-        m_queuelocker.lock();
+        lock_guard tmp(m_queuelocker);
         if(m_workqueue.empty())
         {
-            m_queuelocker.unlock();
+            
             continue;
         }
-        T request=m_workqueue.front();
+        T* request=m_workqueue.front();
         m_workqueue.pop_front();
-        m_queuelocker.unlock();
+        tmp.unlock();
         if(! request){
             continue;
         }

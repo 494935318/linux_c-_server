@@ -2,6 +2,8 @@
 #include"locker.h"
 #include"event_loop.h"
 #include"TCP_Connect.h"
+#include"TCP_Server.h"
+// #include"TCP_Connect.h"
 int run1 (int argc,char *argv[]){
     
     const char *ip="127.0.0.1";
@@ -63,11 +65,49 @@ void run(event_loop&a){
     a.runafter(b,bind(run,ref(a)));
 }
 void run3(){
-    static int i=1;
+    static int i=0;
     i++;
-    cout<<"the "<<i<<"th"<<endl;
+    cout<<"the "<<i<<"second"<<endl;
+
+}
+void stop(time_id a){
+a.stop();
+cout<<"stoped"<<endl;
+}
+int main1(){
+event_loop a;
+timeval b;
+b.tv_sec=1;
+b.tv_usec=0;
+auto c=a.runevery(b,run3);
+b.tv_sec=7;
+a.runafter(b,bind(stop,c));
+a.run();
+}
+void echo(shared_ptr<TCP_Connect>a){
+    string out(a->read_buf.begin(),a->read_buf.end());
+    a->read_buf.retrieve_all();
+    a->send(out);
+    cout<<out;
+    
+}
+void on_connect(shared_ptr<TCP_Connect>a){
+    int fd=a->get_fd();
+    print_getpeername(fd);
+    cout<< "loop_pid_owner:"<<a->get_owner_pid()<<endl;
+    cout<< "loop_pid_now:"<<current_thread_id()<<endl;  
+    a->send("connected\n");
 }
 int main(){
+event_loop a;
+TCP_Server b(&a,"127.0.0.1",3026,2000);
+b.set_threadnum(5);
+b.set_on_message(echo);
+b.set_on_connect(on_connect);
+b.work();
+a.run();
+}
+int main2(){
 event_loop a;
 timeval b;
 const char *ip="127.0.0.1";
@@ -82,9 +122,10 @@ int tmp=connect(sock_tmp,(sockaddr*)addr1,sizeof(*addr1));
 string out="123\n\r";
  int n=send(sock_tmp,&out[0],5,0);
  cout<<n<<endl;
-shared_ptr<TCP_Connect> tcp_client(new TCP_Connect( a,sock_tmp));
+shared_ptr<TCP_Connect> tcp_client(new TCP_Connect( sock_tmp,&a));
 tcp_client->work();
 tcp_client.reset();
 a.run();
+// priority_queue<int>t;
 }
 

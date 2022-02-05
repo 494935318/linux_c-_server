@@ -1,6 +1,3 @@
-#ifndef __EVENT_LOOP_H__
-#define __EVENT_LOOP_H__
-
 #include "utils.h"
 #include <sys/timerfd.h>
 #include <sys/time.h>
@@ -225,49 +222,208 @@ private:
     int time_fd;
 };
 
-
 class event_loop : noncopyable
 {
 public:
-    event_loop(int size = 5);
-    void update(channel *a);
-    void unregister(channel*a);
-    static void my_sig_handler(int a);
-    void addsig(int sig, callback_fun cb);
-    
-    time_id runafter(int timeusec, callback_fun cb);
-    time_id runafter(timeval time, callback_fun cb);
-    time_id runevery(timeval time, callback_fun cb);
-    void runsooner(callback_fun cb);
-      
-    
-
-    void wakeup();
-    void run();
-    void stop();
-    int size();
-    int get_owner_pid(){
-        return owner_thread;
+    event_loop(int size = 5)
+    {
+        epoll_fd = epoll_create(size);
+        addfd(epoll_fd, timer.time_fd);
+        if (sig_pipefd[0] == -1)
+            socketpair(PF_UNIX, SOCK_STREAM, 0, sig_pipefd);
+        addfd(epoll_fd, sig_pipefd[1]);
     }
-    bool is_in_loopthread();
-private:
-    void run_sig();
-    void run_event();
-    locker mutex_;
-    pid_t owner_thread;
-    int event_run_pid;
-    shared_ptr<channel> time_channel;
-    shared_ptr<channel> signal_channel;
-    shared_ptr<channel> event_channel;
-    int size_;
-    shared_ptr<epoller> epoller_;
-    static int sig_pipefd[2];
+    static void my_sig_handler(int a)
+    {
+        sig_handler(a, sig_pipefd[0]);
+    }
+    void addsig(int sig, callback_fun cb)
+    {   
+        lock_guard guard(epoll_lock);
+        sig_handle[sig] = cb;
+        add_sig(sig, my_sig_handler);
+    }
+    void add(int fd, callback_fun f, int ctl = 1, bool oneshot = false)
+    {
+        lock_guard guard(epoll_lock);
+        if (fd_ctl.find(fd) == fd_ctl.end())
+        {
+            if (ctl & EVENT_IN)
+            {
+                in_handle[fd] = f;
+            }
+            if (ctl & EVENT_OUT)
+            {
+                out_handle[fd] = f;
+            }
+            auto tmp=addfd(epoll_fd, fd, ctl, true, oneshot);
+            fd_ctl[fd] = tmp;
+            event_num++;
+        }
+        else
+        {
+            uint32_t tmp = fd_ctl[fd];
+            if (ctl & EVENT_IN)
+            {
+                in_handle[fd] = f;
+                tmp |= EPOLLIN;
+            }
+            if (ctl & EVENT_OUT)
+            {
+                out_handle[fd] = f;
+                tmp |= EPOLLOUT;
+            }
+            if(oneshot){
+                tmp|=EPOLLONESHOT;
+            }else{
+                 tmp&=~EPOLLONESHOT;
+            }
+            mode_fd(tmp, fd, epoll_fd);
+            fd_ctl[fd] = tmp;
+        }
+    }
+    void reset_stat(int fd,bool oneshot=true){
+        lock_guard guard(epoll_lock);
+        auto tmp=fd_ctl[fd];
+        if(oneshot){
+            tmp|=EPOLLONESHOT;
+        }
+        else
+        {
+            tmp&=!EPOLLONESHOT;
+        }
+        mode_fd(fd_ctl[fd],fd,epoll_fd);
+    }
+    void remove(int fd, int ctl)
+    {   
+        lock_guard guard(epoll_lock);
+        auto tmp = fd_ctl[fd];
+        if ((ctl & EVENT_IN)&&(tmp&EPOLLIN))
+        {   
+            in_handle.erase(fd);
+            tmp &= ~EPOLLIN;
+        }
+        if ((ctl & EVENT_OUT)&&(tmp&EPOLLOUT))
+        {
+            out_handle.erase(fd);
+            tmp &= ~EPOLLOUT;
+        }
+        if (!(tmp & EPOLLIN) && !(tmp & EPOLLOUT))
+        {
+            fd_ctl.erase(fd);
+            removefd(epoll_fd, fd);
+            event_num--;
+        }
+        else
+        {
+            mode_fd(tmp, fd, epoll_fd);
+            fd_ctl[fd] = tmp;
+        }
+    }
     
+    void runafter(int timeusec, callback_fun cb)
+    {
+        timer.set_time_callback(timeusec, cb);
+    }
+    void runafter(timeval time, callback_fun cb)
+    {
+        timer.set_time_callback(time, cb);
+    }
+    void runevery(timeval time, callback_fun cb)
+    {
+        timer.set_time_run_every(time, cb);
+    }
+    void runsooner(callback_fun cb)
+    {   lock_guard a(epoll_lock);
+        call_loop.push_back(cb);
+    }
+
+    void run()
+    {
+        while (is_run)
+        {
+            epoll_event *event = new epoll_event[event_num];
+            int n = epoll_wait(epoll_fd, event, event_num, 100000);
+            for (int i = 0; i < n; i++)
+            {
+                int fd = event[i].data.fd;
+                if (fd == timer.time_fd)
+                {
+                    timer.run();
+                }
+                else if (fd == sig_pipefd[1])
+                {
+                    int sig = 0;
+                    read(sig_pipefd[1], &sig, sizeof(sig));
+                    lock_guard guard(epoll_lock); 
+                    if (sig_handle.find(sig) != sig_handle.end())
+                    {
+                        auto tmp=sig_handle[sig];
+                        guard.unlock();
+                        tmp();
+                    }
+                }
+                else
+                {
+                    if (event[i].events & EPOLLIN)
+                    {    lock_guard guard(epoll_lock); 
+                        if (in_handle.find(fd) != in_handle.end())
+                        {   
+                            auto tmp= in_handle[fd];
+                            guard.unlock();
+                            tmp();
+                           
+                        }
+                    }
+                    if (event[i].events & EPOLLOUT)
+                    {   
+                      lock_guard guard(epoll_lock); 
+
+                        if (out_handle.find(fd) != out_handle.end())
+                        {   auto tmp= out_handle[fd];
+                            guard.unlock();
+                            tmp();
+                        }
+                    }
+                }
+            }
+            delete[] event;
+            int n_run_soon = call_loop.size();
+            for (int i = 0; i < n_run_soon; i++)
+            {   auto j = call_loop.front();
+                j();
+                call_loop.pop_front();
+            }
+        }
+    }
+    void stop()
+    {
+        is_run = false;
+    }
+    
+private:
+    void addwrite(int fd, callback_fun f)
+    {
+        epoll_event event;
+        event.data.fd = fd;
+        event.events = EPOLLOUT;
+        event.events |= EPOLLET;
+        event.events |= EPOLLONESHOT;
+        epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event);
+        set_nonblock(fd);
+        out_handle[fd] = f;
+    }
+    int epoll_fd;
+    locker epoll_lock;
+    unordered_map<int, uint32_t> fd_ctl;
+    unordered_map<int, callback_fun> in_handle;
+    unordered_map<int, callback_fun> out_handle;
+    unordered_map<int, callback_fun> sig_handle;
+    static int sig_pipefd[2];
+
     bool is_run = true;
     int event_num = 10;
     timer_fd timer;
     list<callback_fun> call_loop;
-    unordered_map<int,callback_fun>  sig_handle;
 };
-
-#endif // __EVENT_LOOP_H__
+int event_loop::sig_pipefd[2] = {-1, -1};

@@ -3,7 +3,7 @@
 
 
 #include"all_include.h"
-
+int current_thread_id();
 // sockaddr* get_tcp_address(char * ip,int port);
 sockaddr_in* get_addr_ipv4(const char * ip,int port);
 sockaddr_in6* get_addr_ipv6(const char * ip,int port);
