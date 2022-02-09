@@ -19,6 +19,8 @@
         "utility": "cpp",
         "optional": "cpp",
         "numeric": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "any": "cpp",
+        "list": "cpp"
     }
 }

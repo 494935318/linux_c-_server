@@ -29,22 +29,32 @@ class TCP_Connect : noncopyable, public enable_shared_from_this<TCP_Connect>
     void set_on_write_finish(callback_fun_TCP cb){
         on_writefinish=cb;
     }
+    void send_file(int fd,int size);
     int get_fd(){
         return fd;
     }
+    void set_keep_alive(int a){
+        is_keepalive=true;
+        setsockopt(fd,SOL_SOCKET,SO_KEEPALIVE,&a,sizeof(a));
+    };
     int get_owner_pid();
     Buffer::Buffer read_buf,write_buf;
+    void set_context(const string& a,any b);
+    any get_context(const string& a);
    private:
-
+    unordered_map<string, any> context;
    static void send_in_loop(weak_TCP in,string a);
     static void write(weak_TCP in);
     static void read(weak_TCP in);
    void close();
+   private:
+   bool is_keepalive=false;
    callback_fun_TCP on_message=0;
    callback_fun_TCP on_close=0;
    callback_fun_TCP on_writefinish=0;
     bool onclose=false;
     bool iswriting=false;
+    bool issendfile=false;
     int fd;
     event_loop * loop;
     shared_ptr<channel> channel_;

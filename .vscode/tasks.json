@@ -7,6 +7,7 @@
 			"command": "/usr/bin/g++",
 			"args": [
 				// "-O2",
+				"-std=c++17",
 				"-pthread",
 				"-fdiagnostics-color=always",
 				"-g",
@@ -19,6 +20,8 @@
 				"${workspaceFolder}/build/${fileBasenameNoExtension}",
 				"-L",
 				"${workspaceFolder}/../libevent-2.1.12-stable/"
+				
+				
 			],
 			"options": {
 				"cwd": "${fileDirname}"

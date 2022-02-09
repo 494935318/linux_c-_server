@@ -247,3 +247,32 @@ int current_thread_id(){
     }
     return a;
 }
+std::string& trim(std::string &s) 
+{
+    if (!s.empty()) 
+    {
+        s.erase(0,s.find_first_not_of(" "));
+    	s.erase(s.find_last_not_of(" ") + 1);
+    }
+    return s;
+}
+vector<string> split(string a, string b){
+    vector<string> out;
+    int i=0,n=a.size();
+    while(i<n){
+        i=a.find_first_not_of(b,i);
+        if(i==string::npos){
+            return out;
+        }
+        int j=a.find_first_of(b,i);
+        if(j!=string::npos){
+        out.push_back(a.substr(i,j-i));
+        }
+        else{
+         out.push_back(a.substr(i));
+        return out;
+        }
+        i=j+1;
+    }
+return out;
+}

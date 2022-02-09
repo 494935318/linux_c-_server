@@ -23,8 +23,10 @@ void TCP_Server::on_new_connect(int fd, sockaddr_in addr){
     con->set_on_close(bind(&TCP_Server::on_connect_close,this,placeholders::_1));
     con->set_on_message(on_message);
     connect_map[fd]=con;
-    con->work();
+    // 预备工作
     if(on_connect) on_connect(con);
+    con->work();
+ 
 };
  void  TCP_Server::set_threadnum(int size){
      loop_pool.reset(new Thread_event_loop(size));

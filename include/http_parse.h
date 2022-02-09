@@ -1,6 +1,9 @@
+#ifndef __HTTP_PARSE_H__
+#define __HTTP_PARSE_H__
+
 #include "utils.h"
 #include "config.h"
-LINE_STATUS parse_line(char *buff, int &checked_index, int &read_index)
+LINE_STATUS parse_line(char *buff, int &checked_index, int read_index)
 {
     char temp;
     for (; checked_index < read_index; ++checked_index)
@@ -44,7 +47,7 @@ HTTP_CODE parse_requestion(char *temp, CHECK_STATE &checkstate, T &holder)
     }
     *url++ = '\0'; //断开
     char *method = temp;
-    strcpy(holder.method, method);
+    holder.set_method(method);
     url += strspn(url, " \t");
 
     char *version = strpbrk(url, " \t");
@@ -54,27 +57,55 @@ HTTP_CODE parse_requestion(char *temp, CHECK_STATE &checkstate, T &holder)
     }
     *version++ = '\0';
     version += strspn(version, " \t");
-    strcpy(holder.version, version);
-    holder.set_url(url);
+    holder.set_http_ver(version);
+    vector<string > out=split(url,"?");
+    holder.set_url(out[0]);
+    holder.set_getdata(out[1]);
     checkstate = CHECK_STATE_HEADER;
     return NO_REQUEST;
 }
+
+
+
 template <class T>
-HTTP_CODE parse_headers(char *temp, T &holder)
+HTTP_CODE parse_headers(char *temp, T &holder,CHECK_STATE & state)
 {
     if (temp[0] == '\0')
     {
+        if(holder.get_contentLength()==0)
         return GET_REQUEST;
+        else
+        {
+            state=CHECK_STATE_CONTENT;
+            return NO_REQUEST; 
+        }
     }
     else if (strncasecmp(temp, "HOST:", 5) == 0)
     {
         temp += 5;
         temp += strspn(temp, " \t");
-        strcpy(holder.host, temp);
+        holder.set_host(temp);
     }
     else
-    {
-        cout << "other header 字段" << endl;
+    {   int i=0;
+        for(;;i++){
+            if(temp[i]=='\0')
+            break;
+            if(temp[i]==':')
+            break;
+           
+        }
+        if(temp[i]!='\0') 
+        {
+        string name=string(temp,temp+i);
+        string data=string(temp+1+i);
+        trim(name);
+        trim(data);
+        if(name=="Content-Length"){
+            holder.set_contentLength(atoi(data.c_str()));
+        }
+        holder.set_head_data(name,data);
+        }
     }
     return NO_REQUEST;
 }
@@ -128,3 +159,6 @@ HTTP_CODE parse_content(char *buffer, int &checked_index, CHECK_STATE &checkstat
         return BAD_REQUEST;
     }
 }
+
+
+#endif // __HTTP_PARSE_H__

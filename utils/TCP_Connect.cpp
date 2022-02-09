@@ -7,6 +7,8 @@ TCP_Connect::TCP_Connect(int fd, event_loop *loop) : fd(fd), loop(loop)
 {
     channel_.reset(new channel(loop, fd));
     on_message = default_on_message;
+    channel_->set_read_cb(bind(&TCP_Connect::read, weak_TCP(shared_from_this())));
+    channel_->set_write_cb(bind(&TCP_Connect::write, weak_TCP(shared_from_this())));
 };
 void TCP_Connect::work()
 {
@@ -16,11 +18,20 @@ void TCP_Connect::work()
         mem_TCP_list.push_front(shared_from_this());
         idx = mem_TCP_list.begin();
     }
-    channel_->set_read_cb(bind(&TCP_Connect::read, weak_TCP(shared_from_this())));
-    channel_->set_write_cb(bind(&TCP_Connect::write, weak_TCP(shared_from_this())));
     channel_->enable_read();
     //  n1=shared_from_this().use_count();
 }
+    void  TCP_Connect::set_context(const string &a,any b){
+        context[a]=b;
+    };
+    any TCP_Connect::get_context(const string& a){
+        if(context.find(a)!=context.end())
+        return  context[a];
+        else 
+        return any(0);
+    };
+    
+
 void TCP_Connect::send(const string &in)
 {
     // 关闭后发送直接无效
@@ -56,6 +67,7 @@ void TCP_Connect::send(const string &in)
                 iswriting = true;
                 channel_->enable_write();
             }
+            else
             if (on_writefinish)
                 on_writefinish(shared_from_this());
         }
@@ -149,7 +161,7 @@ void TCP_Connect::close()
 {
     onclose = true;
     loop->unregister(channel_.get());
-    int tmp1 = channel_.use_count();
+    // int tmp1 = channel_.use_count();
     // int n=shared_from_this().use_count();
     //  n=shared_from_this().use_count();
     if (on_close)

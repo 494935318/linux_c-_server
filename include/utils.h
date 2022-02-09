@@ -3,6 +3,7 @@
 
 
 #include"all_include.h"
+
 int current_thread_id();
 // sockaddr* get_tcp_address(char * ip,int port);
 sockaddr_in* get_addr_ipv4(const char * ip,int port);
@@ -23,4 +24,7 @@ class noncopyable
 };
 void add_sig(int sig, __sighandler_t hand);
 void sig_handler(int sig,int fd);
+std::string& trim(std::string &s);
+vector<string> split(string a, string b);
+
 #endif // __UTILS_H__
