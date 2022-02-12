@@ -3,6 +3,7 @@
 
 #include "utils.h"
 #include<memory>
+#include <netinet/tcp.h>
 #include "buffer.h"
 #include"locker.h"
 class TCP_Connect;
@@ -35,7 +36,18 @@ class TCP_Connect : noncopyable, public enable_shared_from_this<TCP_Connect>
     }
     void set_keep_alive(int a){
         is_keepalive=true;
+        
         setsockopt(fd,SOL_SOCKET,SO_KEEPALIVE,&a,sizeof(a));
+    if(a)
+        {
+            int keepidle = 2; // 如该连接在60秒内没有任何数据往来,则进行探测
+            int keepinterval = 1; // 探测时发包的时间间隔为5 秒
+            int keepcount = 1; // 探测尝试的次数。如果第1次探测包就收到响应了,则后2次的不再发。
+            
+            setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, (void*)&keepidle , sizeof(keepidle ));
+            setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, (void *)&keepinterval , sizeof(keepinterval ));
+            setsockopt(fd, SOL_TCP, TCP_KEEPCNT, (void *)&keepcount , sizeof(keepcount ));
+        }
     };
     int get_owner_pid();
     Buffer::Buffer read_buf,write_buf;

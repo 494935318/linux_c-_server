@@ -35,6 +35,7 @@ void TCP_Server::on_new_connect(int fd, sockaddr_in addr){
 void TCP_Server::on_connect_close(shared_ptr<TCP_Connect> tmp){
     if(loop->is_in_loopthread()){
         remove_connect(tmp->get_fd());
+        
     }
     else{
         loop->runsooner(bind(&TCP_Server::remove_connect,this,tmp->get_fd()));
@@ -42,6 +43,7 @@ void TCP_Server::on_connect_close(shared_ptr<TCP_Connect> tmp){
 };
 void TCP_Server::remove_connect(int fd){
     connect_map.erase(fd);
+    cout<<"remain connect:"<<connect_map.size()<<endl;
 };
 void TCP_Server::work(){
     acceptor_->set_connect_cb(bind(&TCP_Server::on_new_connect,this,placeholders::_1,placeholders::_2));

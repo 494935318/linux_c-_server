@@ -6,6 +6,7 @@ void http_server::Init(int port,int thread_num){
     server->set_threadnum(thread_num);
     server->set_on_connect( bind(&http_server::on_connect,this,placeholders::_1));
     server->set_on_message(0);
+    
 };
 void http_server::start(){
     server->work();
@@ -17,9 +18,9 @@ void http_server::set_location(string locate, http_cb cb){
 void  http_server::on_connect(weak_TCP in){
     auto tmp=in.lock();
     if(tmp){
-
-shared_ptr<request> req(new request());
-tmp->set_on_message(bind(&http_server::on_data,this,placeholders::_1,req));
+        tmp->set_keep_alive(1);
+    shared_ptr<request> req(new request());
+    tmp->set_on_message(bind(&http_server::on_data,this,placeholders::_1,req));
 
     }
 
