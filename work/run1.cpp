@@ -107,7 +107,7 @@ void on_connect(shared_ptr<TCP_Connect> a)
     cout << "loop_pid_now:" << current_thread_id() << endl;
     a->send("connected\n");
 }
-int main()
+int main3()
 {
     event_loop a;
     TCP_Server b(&a, "127.0.0.1", 3026, 2000);

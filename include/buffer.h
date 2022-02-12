@@ -57,7 +57,7 @@ class Buffer:noncopyable{
             read_index=PRE_SIZE;
             write_index=PRE_SIZE;
         }
-        fill(buff_.begin()+PRE_SIZE,buff_.end(),'\0');
+        // fill(buff_.begin()+PRE_SIZE,buff_.end(),'\0');
     }
     //末尾增加信息
     // 由send调用

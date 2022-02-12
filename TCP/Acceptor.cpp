@@ -16,6 +16,7 @@ Acceptor::Acceptor(string ip, int port, event_loop *loop, int max_size) : loop(l
     channel_->set_event(0);
     channel_->set_read_cb(bind(&Acceptor::handleread, this));
 };
+
 void Acceptor::listen()
 {
     ::listen(fd, max_size);

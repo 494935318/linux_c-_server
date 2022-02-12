@@ -25,6 +25,6 @@ class noncopyable
 void add_sig(int sig, __sighandler_t hand);
 void sig_handler(int sig,int fd);
 std::string& trim(std::string &s);
-vector<string> split(string a, string b);
+vector<string> split(string a, string b,int num=1);
 
 #endif // __UTILS_H__

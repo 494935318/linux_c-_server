@@ -256,10 +256,11 @@ std::string& trim(std::string &s)
     }
     return s;
 }
-vector<string> split(string a, string b){
+vector<string> split(string a, string b,int time){
     vector<string> out;
     int i=0,n=a.size();
-    while(i<n){
+    int used_time=0;
+    while(i<n&&used_time<time){
         i=a.find_first_not_of(b,i);
         if(i==string::npos){
             return out;
@@ -273,6 +274,7 @@ vector<string> split(string a, string b){
         return out;
         }
         i=j+1;
+        used_time++;
     }
 return out;
 }

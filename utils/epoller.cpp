@@ -6,8 +6,13 @@ epoller::epoller(event_loop *a) : owner(a)
 {
     epoll_fd = epoll_create(a->size());
 };
-void epoller::update(channel *a)
+void epoller::update(weak_ptr<channel> in )
 {
+    auto a=in.lock();
+    if(a)
+    {
+
+   
     int fd = a->get_fd();
     // int event = a->get_events();
     epoll_event tmp;
@@ -40,8 +45,11 @@ void epoller::update(channel *a)
         }
     }
 }
-void epoller::unregister(channel *a)
-{
+}
+void epoller::unregister(weak_ptr<channel> in)
+{auto a=in.lock();
+    if(a){
+
     int fd = a->get_fd();
     
      if (cb_map.find(fd) != cb_map.end())
@@ -54,6 +62,7 @@ void epoller::unregister(channel *a)
         a->set_registered(false);
     }
 }
+}
 void epoller::run(int time_, channellist *out)
 {
     vector<epoll_event> events_run(cb_map.size());
@@ -61,9 +70,11 @@ void epoller::run(int time_, channellist *out)
     for (int i = 0; i < num; i++)
     {   //cout<<events_run[i].data.fd<<endl;
          if(cb_map.find(events_run[i].data.fd)!=cb_map.end()){
-        auto j = cb_map[events_run[i].data.fd];
-        j->set_revent(events_run[i].events);
+        auto j = cb_map[events_run[i].data.fd].lock();
+        if(j)
+        {j->set_revent(events_run[i].events);
         out->push_back(j);
+        };
         }
     }
 };

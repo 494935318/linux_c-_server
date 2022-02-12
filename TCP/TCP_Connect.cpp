@@ -4,15 +4,17 @@
 locker TCP_list_lock;
 list<shared_ptr<TCP_Connect>> mem_TCP_list;
 TCP_Connect::TCP_Connect(int fd, event_loop *loop) : fd(fd), loop(loop)
-{
+{   cout<<"thread_id:"<<loop->get_owner_pid()<<endl;
+    cout<<"connected:"<<fd;
+    print_getpeername(fd);
     channel_.reset(new channel(loop, fd));
     on_message = default_on_message;
-    channel_->set_read_cb(bind(&TCP_Connect::read, weak_TCP(shared_from_this())));
-    channel_->set_write_cb(bind(&TCP_Connect::write, weak_TCP(shared_from_this())));
 };
 void TCP_Connect::work()
 {
     //  int n1=shared_from_this().use_count();
+    channel_->set_read_cb(bind(&TCP_Connect::read, weak_TCP(shared_from_this())));
+    channel_->set_write_cb(bind(&TCP_Connect::write, weak_TCP(shared_from_this())));
     {
         lock_guard tmp(TCP_list_lock);
         mem_TCP_list.push_front(shared_from_this());
@@ -160,7 +162,7 @@ void shut_down_inloop(weak_TCP in)
 void TCP_Connect::close()
 {
     onclose = true;
-    loop->unregister(channel_.get());
+    loop->unregister(channel_);
     // int tmp1 = channel_.use_count();
     // int n=shared_from_this().use_count();
     //  n=shared_from_this().use_count();
@@ -168,6 +170,8 @@ void TCP_Connect::close()
         on_close(shared_from_this());
     lock_guard tmp(TCP_list_lock);
     mem_TCP_list.erase(idx);
+    cout<<"close:"<<fd<<"address";
+    print_getpeername(fd);
 };
 void TCP_Connect::forceclose()
 {

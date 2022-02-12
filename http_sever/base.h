@@ -2,13 +2,50 @@
 #define __BASE_H__
 
 #include"utils.h"
+#include<string.h>
+#include<stdio.h>
 class header
 {
     public:
-        string get_data(string a);
-        void set_data(string a,string b);
-        void set_cookie(string a, string b );
-        void get_cookie(string a ,string b);
+        string get_data(string a){
+            if(head_data.find(a)!=head_data.end())
+            return head_data[a];
+            else{
+                return "";
+            }
+        };
+        void set_data(string a,string b){
+            head_data[a]=b;
+        };
+        void set_cookie(string a, string b ){
+            cookies[a]=b;
+        };
+        string  get_cookie(string a ){
+            if(cookies.find(a)!=cookies.end())
+            return cookies[a];
+            else{
+                return "";
+            }
+        };
+        string get_content(){
+            string out="";
+            // char tmp[10000]={'\0'};
+            for(auto i=head_data.begin();i!=head_data.end();i++){
+                // char tmp[10000]={'\0'};
+                // sprintf(tmp,"%s:%s\r\n",(*i).first,(*i).second);
+                out+=(*i).first+':'+(*i).second+"\r\n";
+                // fill(tmp,&tmp[10000],'\0');
+            }
+            if(cookies.size()!=0){
+                string cookies_out="cookie: ";
+                for(auto i=cookies.begin();i!=cookies.end();i++){
+                    cookies_out+= (*i).first+'='+(*i).second+' ';
+                };
+                cookies_out+="\r\n";
+                out+=cookies_out;
+            }
+            return out;
+        }
     private:
         unordered_map<string ,string > head_data;
         unordered_map<string ,string > cookies;
@@ -34,6 +71,7 @@ void del_context(string a){
 private :
 unordered_map<string ,any> context;
 };
+
 
 
 #endif // __BASE_H__

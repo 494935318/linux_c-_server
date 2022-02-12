@@ -1,3 +1,6 @@
+#ifndef __HTTP_SERVER_H__
+#define __HTTP_SERVER_H__
+
 #include "utils.h"
 #include"path_tree.h"
 #include"request.h"
@@ -10,7 +13,7 @@ typedef function<void (request&,response&)> http_cb;
 class http_server:noncopyable
 {
     public:
-        void Init(int port,int thread_num);
+        void Init(int port,int thread_num=0);
         void start();
         void set_location(string locate, http_cb cb);
         void on_data(weak_TCP in,shared_ptr<request> req);
@@ -22,3 +25,4 @@ class http_server:noncopyable
 
 
 };
+#endif // __HTTP_SERVER_H__

@@ -21,6 +21,8 @@
         "numeric": "cpp",
         "cmath": "cpp",
         "any": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "complex": "cpp",
+        "random": "cpp"
     }
 }

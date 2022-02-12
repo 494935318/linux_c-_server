@@ -9,8 +9,12 @@
 class request : public base_body
 {
 public:
-    request();
-    ~request();
+    request(){
+
+    };
+    ~request(){
+        
+    };
     void set_getdata(string a){
         get_data=a;
     };
@@ -148,7 +152,7 @@ public:
             else{
                 if(tmp->read_buf.readable_size()>=content_length)
                 {
-                copy(tmp->read_buf.begin(),tmp->read_buf.begin()+content_length,content);
+                content=string(tmp->read_buf.begin(),content_length);
                 tmp->read_buf.retrieve(content_length);
                 return GET_REQUEST;
                 }
@@ -157,9 +161,7 @@ public:
             }
         };
     }
-
-private:
-    void reset()
+ void reset()
     {
         checkstat = CHECK_STATE_REQUESTLINE;
         checked_index = 0;
@@ -167,6 +169,8 @@ private:
         content_length = 0;
         content.clear();
     }
+private:
+   
     int checked_index = 0;
     int content_length = 0;
     int content_readed = 0;

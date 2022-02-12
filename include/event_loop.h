@@ -230,8 +230,8 @@ class event_loop : noncopyable
 {
 public:
     event_loop(int size = 5);
-    void update(channel *a);
-    void unregister(channel*a);
+    void update(weak_ptr<channel> a);
+    void unregister(weak_ptr<channel>  a);
     static void my_sig_handler(int a);
     void addsig(int sig, callback_fun cb);
     

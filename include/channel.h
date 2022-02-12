@@ -6,10 +6,13 @@
 // 事件分发器
 class event_loop;
 typedef function<void()> callback_fun;
-class channel:noncopyable
+class channel:noncopyable,public enable_shared_from_this<channel>
 {
     public:
     channel(event_loop *loop,int fd);
+    ~channel(){
+        cout<<"channel:"<<fd<<" closed"<<endl;
+    }
     void restart();
     void disableall();
     void enable_write();
