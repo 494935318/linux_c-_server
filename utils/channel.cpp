@@ -57,7 +57,7 @@ void channel::set_write_cb(callback_fun f)
 void channel::update()
 {
 
-    loop->update(shared_from_this());
+    loop->update(weak_ptr<channel>(shared_from_this()));
 }
 void channel::handle_event()
 {

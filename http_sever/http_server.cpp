@@ -15,18 +15,20 @@ void http_server::start(){
 void http_server::set_location(string locate, http_cb cb){
     tree.add_path(locate,cb);
 };
+void TCP_close(const shared_ptr<TCP_Connect> &in){
+in->forceclose();
+}
 void  http_server::on_connect(weak_TCP in){
     auto tmp=in.lock();
     if(tmp){
-        tmp->set_keep_alive(1);
+        // tmp->set_keep_alive(1);
     shared_ptr<request> req(new request());
     tmp->set_on_message(bind(&http_server::on_data,this,placeholders::_1,req));
-
+    tmp->set_on_write_finish(TCP_close);
     }
-
-
+    
 }
- void http_server::on_data(weak_TCP in,shared_ptr<request> req){
+ void http_server::on_data(weak_TCP in,const shared_ptr<request> &req){
     auto tmp=in.lock();
     if(tmp){
     auto stat=req->parse_requestion(in);
@@ -51,5 +53,6 @@ void  http_server::on_connect(weak_TCP in){
         req->reset();
 
     }
+    // tmp->shurtdown();
     }
 };

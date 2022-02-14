@@ -30,8 +30,12 @@ void Acceptor::handleread()
 {
     sockaddr_in a;
     socklen_t b;
-    int in_fd = accept4(fd, (sockaddr *)&a, &b, SOCK_CLOEXEC | SOCK_NONBLOCK);
-    if (in_fd == -1)
+    int in_fd=1;
+    while(in_fd!=-1)
+    {
+     in_fd = accept4(fd, (sockaddr *)&a, &b, SOCK_CLOEXEC | SOCK_NONBLOCK);
+    if (in_fd!=-1)on_connect(in_fd, a);
+    else
     {
         auto save_err = errno;
         switch (save_err)
@@ -47,5 +51,6 @@ void Acceptor::handleread()
             break;
         }
     }
-    on_connect(in_fd, a);
+    
+    }
 }

@@ -11,7 +11,7 @@ typedef function<void(shared_ptr<TCP_Connect>)> server_callback_fun;
 class TCP_Server : noncopyable
 {
 public:
-    TCP_Server(event_loop *, string ip, int port, int size = 2000);
+    TCP_Server(event_loop *, string ip, int port, int size = 5);
     void set_on_connect(server_callback_fun);
     void set_on_message(server_callback_fun);
     void work();
@@ -20,7 +20,7 @@ public:
 private:
     void remove_connect(int fd);
     void on_new_connect(int, sockaddr_in);
-    void on_connect_close(shared_ptr<TCP_Connect>);
+    void on_connect_close(const shared_ptr<TCP_Connect>&);
     
 private:
 

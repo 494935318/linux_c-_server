@@ -92,14 +92,14 @@ int main1()
     a.runafter(b, bind(stop, c));
     a.run();
 }
-void echo(shared_ptr<TCP_Connect> a)
+void echo(const shared_ptr<TCP_Connect>& a)
 {
     string out(a->read_buf.begin(), a->read_buf.end());
     a->read_buf.retrieve_all();
     a->send(out);
     cout << out;
 }
-void on_connect(shared_ptr<TCP_Connect> a)
+void on_connect(const shared_ptr<TCP_Connect> &a)
 {
     int fd = a->get_fd();
     print_getpeername(fd);

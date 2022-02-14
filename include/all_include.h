@@ -1,6 +1,7 @@
 #ifndef ALL_INCLUD
-#define ALL_INCLUD0
+#define ALL_INCLUD
 #include<sys/un.h>
+#include <sys/syscall.h>
 #include<any>
 #include<sys/socket.h>
 #include<sys/sem.h>

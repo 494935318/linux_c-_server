@@ -15,4 +15,5 @@ class Thread_event_loop:noncopyable
     locker mutex_;
     shared_ptr<t_pool> pool;
     vector<shared_ptr<event_loop>> loop_vector;
+    count_down_latch c_l;
 };

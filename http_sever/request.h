@@ -15,30 +15,30 @@ public:
     ~request(){
         
     };
-    void set_getdata(string a){
+    void set_getdata(const string &a){
         get_data=a;
     };
     string get_getdata(){
         return get_data;
     }
-    void set_method(string a)
+    void set_method(const string &a)
     {
         method = a;
     };
-    void set_url(string a)
+    void set_url(const string &a)
     {
         url = a;
     };
-    void set_http_ver(string a)
+    void set_http_ver(const string &a)
     {
         http_version = a;
     };
     // void set_host(string a);
-    void set_head_data(string a, string b)
+    void set_head_data(const string &a, const string &b)
     {
         head_data.set_data(a, b);
     };
-    void set_host(string a)
+    void set_host(const string &a)
     {
         host = a;
     }
@@ -50,7 +50,7 @@ public:
     {
         return content_length;
     }
-    bool set_content(string a, int n)
+    bool set_content(const string &a, int n)
     {
         post_data += a;
         content_readed += n;
@@ -73,7 +73,7 @@ public:
     {
         return host;
     };
-    string get_head_data(string a)
+    string get_head_data(const string &a)
     {
         return head_data.get_data(a);
     };
@@ -81,7 +81,7 @@ public:
     {
         return content;
     };
-    string add_content(string a)
+    string add_content(const string &a)
     {
         content += a;
     };

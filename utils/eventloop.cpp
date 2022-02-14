@@ -66,6 +66,7 @@ void event_loop::runsooner(callback_fun cb)
         }
         wakeup();
     }
+    
 }
 
 void event_loop::wakeup()
@@ -76,13 +77,13 @@ void event_loop::wakeup()
 }
 void event_loop::run()
 {
-    time_channel.reset(new channel(this, timer.time_fd));
+    time_channel=make_shared<channel>( this, timer.time_fd);
     time_channel->set_read_cb(bind(&timer_fd::run, &timer));
     time_channel->enable_read();
-    signal_channel.reset(new channel(this, sig_pipefd[1]));
+    signal_channel=make_shared<channel>(this, sig_pipefd[1]);
     signal_channel->set_read_cb(bind(&event_loop::run_sig, this));
     signal_channel->enable_read();
-    event_channel.reset(new channel(this, event_run_pid));
+    event_channel=make_shared<channel>(this, event_run_pid);
     event_channel->set_read_cb(bind(&event_loop::run_event, this));
     event_channel->enable_read();
     while (is_run)
@@ -95,14 +96,14 @@ void event_loop::run()
             if (tmp)
                 tmp->handle_event();
         }
-        int n_run_soon = call_loop.size();
+        vector<callback_fun> temp_call; 
+        {lock_guard a(mutex_);
+        swap(temp_call,call_loop);
+        }
+        int n_run_soon = temp_call.size();
         for (int i = 0; i < n_run_soon; i++)
         {
-            lock_guard a(mutex_);
-            auto j = call_loop.front();
-            call_loop.pop_front();
-            a.unlock();
-            j();
+                temp_call[i]();
         }
     }
 }

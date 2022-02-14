@@ -3,7 +3,7 @@
 
 
 #include"all_include.h"
-
+#define gettid() syscall(__NR_gettid)
 int current_thread_id();
 // sockaddr* get_tcp_address(char * ip,int port);
 sockaddr_in* get_addr_ipv4(const char * ip,int port);
@@ -26,5 +26,10 @@ void add_sig(int sig, __sighandler_t hand);
 void sig_handler(int sig,int fd);
 std::string& trim(std::string &s);
 vector<string> split(string a, string b,int num=1);
-
+class IgnoreSigPipe{
+    public:
+    IgnoreSigPipe(){
+     
+    }
+};
 #endif // __UTILS_H__

@@ -1,5 +1,7 @@
 #include "utils.h"
 #include "config.h"
+#include<signal.h>
+
 sockaddr *get_tcp_address(const char *ip, int port, bool ipv6 = false)
 {
     decltype(AF_INET) af;
@@ -193,7 +195,7 @@ void sig_handler(int sig,int fd){
     errno=save_erron;
 }
 void add_sig(int sig, __sighandler_t hand){
-struct  sigaction sa;
+struct sigaction sa;
 memset(&sa,'\0',sizeof(sa));
 sa.sa_handler=hand;
 sa.sa_flags|=SA_RESTART;

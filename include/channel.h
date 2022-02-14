@@ -11,7 +11,7 @@ class channel:noncopyable,public enable_shared_from_this<channel>
     public:
     channel(event_loop *loop,int fd);
     ~channel(){
-        cout<<"channel:"<<fd<<" closed"<<endl;
+        // cout<<"channel:"<<fd<<" closed"<<endl;
     }
     void restart();
     void disableall();

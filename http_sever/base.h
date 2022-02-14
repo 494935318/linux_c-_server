@@ -8,8 +8,9 @@ class header
 {
     public:
         string get_data(string a){
-            if(head_data.find(a)!=head_data.end())
-            return head_data[a];
+            auto j=head_data.find(a);
+            if(j!=head_data.end())
+            return j->second;
             else{
                 return "";
             }
@@ -21,8 +22,9 @@ class header
             cookies[a]=b;
         };
         string  get_cookie(string a ){
-            if(cookies.find(a)!=cookies.end())
-            return cookies[a];
+            auto j=cookies.find(a);
+            if(j!=cookies.end())
+            return j->second;
             else{
                 return "";
             }

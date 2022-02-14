@@ -69,8 +69,9 @@ void epoller::run(int time_, channellist *out)
     int num = epoll_wait(epoll_fd, &events_run[0], cb_map.size(), time_);
     for (int i = 0; i < num; i++)
     {   //cout<<events_run[i].data.fd<<endl;
-         if(cb_map.find(events_run[i].data.fd)!=cb_map.end()){
-        auto j = cb_map[events_run[i].data.fd].lock();
+    auto k=cb_map.find(events_run[i].data.fd);
+        if(k!=cb_map.end()){
+        auto j = (*k).second.lock();
         if(j)
         {j->set_revent(events_run[i].events);
         out->push_back(j);

@@ -2,11 +2,11 @@
 #include "channel.h"
 #include "event_loop.h"
 locker TCP_list_lock;
-list<shared_ptr<TCP_Connect>> mem_TCP_list;
+// list<shared_ptr<TCP_Connect>> mem_TCP_list;
 TCP_Connect::TCP_Connect(int fd, event_loop *loop) : fd(fd), loop(loop)
-{   cout<<"thread_id:"<<loop->get_owner_pid()<<endl;
-    cout<<"connected:"<<fd;
-    print_getpeername(fd);
+{   //cout<<"thread_id:"<<loop->get_owner_pid()<<endl;
+    // cout<<"connected:"<<fd;
+    // print_getpeername(fd);
     channel_.reset(new channel(loop, fd));
     on_message = default_on_message;
 };
@@ -16,9 +16,10 @@ void TCP_Connect::work()
     channel_->set_read_cb(bind(&TCP_Connect::read, weak_TCP(shared_from_this())));
     channel_->set_write_cb(bind(&TCP_Connect::write, weak_TCP(shared_from_this())));
     {
-        lock_guard tmp(TCP_list_lock);
-        mem_TCP_list.push_front(shared_from_this());
-        idx = mem_TCP_list.begin();
+        // lock_guard tmp(TCP_list_lock);
+        // mem_TCP_list.push_front(shared_from_this());
+        // idx = mem_TCP_list.begin();
+        holder=shared_from_this();
     }
     channel_->enable_read();
     //  n1=shared_from_this().use_count();
@@ -27,8 +28,9 @@ void TCP_Connect::work()
         context[a]=b;
     };
     any TCP_Connect::get_context(const string& a){
-        if(context.find(a)!=context.end())
-        return  context[a];
+        auto j=context.find(a);
+        if(j!=context.end())
+        return  j->second;
         else 
         return any(0);
     };
@@ -52,7 +54,7 @@ void TCP_Connect::send(const string &in)
         }
         else
         {
-            int n = ::send(fd, &in[0], in.size(), 0);
+            int n = ::send(fd, &in[0], in.size(), MSG_NOSIGNAL);
 
             if (n < 0)
             {
@@ -80,7 +82,7 @@ void TCP_Connect::send(const string &in)
     }
 };
 // 在事件循环内进行
-void TCP_Connect::send_in_loop(weak_TCP in, string a)
+void TCP_Connect::send_in_loop(weak_TCP in, const string &a)
 {
     auto tmp = in.lock();
     if (tmp)
@@ -161,6 +163,7 @@ void shut_down_inloop(weak_TCP in)
 // 强制关闭_in
 void TCP_Connect::close()
 {
+    assert(loop->is_in_loopthread());
     onclose = true;
     loop->unregister(channel_);
     // int tmp1 = channel_.use_count();
@@ -168,10 +171,11 @@ void TCP_Connect::close()
     //  n=shared_from_this().use_count();
     if (on_close)
         on_close(shared_from_this());
-    lock_guard tmp(TCP_list_lock);
-    mem_TCP_list.erase(idx);
-    cout<<"close:"<<fd<<"address";
-    print_getpeername(fd);
+    // lock_guard tmp(TCP_list_lock);
+    // mem_TCP_list.erase(idx);
+    holder.reset();
+    // cout<<"close:"<<fd<<"address";
+    // print_getpeername(fd);
 };
 void TCP_Connect::forceclose()
 {
@@ -181,7 +185,7 @@ TCP_Connect::~TCP_Connect()
 {
     //  loop->unregister(channel_.get());
     ::close(fd);
-    cout << "closed" << endl;
+    // cout << "closed" << endl;
 };
 
 void TCP_Connect::set_on_message(callback_fun_TCP cb)

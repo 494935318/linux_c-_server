@@ -266,7 +266,7 @@ private:
     bool is_run = true;
     int event_num = 10;
     timer_fd timer;
-    list<callback_fun> call_loop;
+    vector<callback_fun> call_loop;
     unordered_map<int,callback_fun>  sig_handle;
 };
 

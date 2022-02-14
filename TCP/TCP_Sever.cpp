@@ -16,23 +16,23 @@ on_message=cb;
 void TCP_Server::on_new_connect(int fd, sockaddr_in addr){
      shared_ptr<TCP_Connect> con;
     if(!multi_thread)
-    con.reset(new TCP_Connect(fd,loop));
+    con=make_shared<TCP_Connect>(fd,loop);
     else
-    con.reset(new TCP_Connect(fd,loop_pool->getnext()));
-    
+    {auto loop_idx=loop_pool->getnext();
+    con=make_shared<TCP_Connect>(fd,loop_idx);}
     con->set_on_close(bind(&TCP_Server::on_connect_close,this,placeholders::_1));
     con->set_on_message(on_message);
     connect_map[fd]=con;
     // 预备工作
     if(on_connect) on_connect(con);
     con->work();
- 
+
 };
  void  TCP_Server::set_threadnum(int size){
      loop_pool.reset(new Thread_event_loop(size));
     multi_thread=true;
  }
-void TCP_Server::on_connect_close(shared_ptr<TCP_Connect> tmp){
+void TCP_Server::on_connect_close(const shared_ptr<TCP_Connect> &tmp){
     if(loop->is_in_loopthread()){
         remove_connect(tmp->get_fd());
         
@@ -43,7 +43,7 @@ void TCP_Server::on_connect_close(shared_ptr<TCP_Connect> tmp){
 };
 void TCP_Server::remove_connect(int fd){
     connect_map.erase(fd);
-    cout<<"remain connect:"<<connect_map.size()<<endl;
+    // cout<<"remain connect:"<<connect_map.size()<<endl;
 };
 void TCP_Server::work(){
     acceptor_->set_connect_cb(bind(&TCP_Server::on_new_connect,this,placeholders::_1,placeholders::_2));

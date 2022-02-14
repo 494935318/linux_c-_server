@@ -33,8 +33,9 @@ bool path_tree:: has_path(const string &a){
         else
         while(i<path.size()&&tmp){
             auto now=path[i++];
-            if(tmp->next.find(now)!=tmp->next.end())
-            tmp=tmp->next[now];
+            auto j=tmp->next.find(now);
+            if(j!=tmp->next.end())
+            tmp=j->second;
             else{
                 node * now_node=new node();
                 tmp->next[now]=now_node;
@@ -56,10 +57,11 @@ bool path_tree:: has_path(const string &a){
         }else
         while(i<path.size()&&tmp){
             auto now=path[i++];
-            if(tmp->next.find(now)==tmp->next.end()){
+            auto j=tmp->next.find(now);
+            if(j==tmp->next.end()){
                 return out;
             }
-            tmp=tmp->next[now];
+            tmp=j->second;
             if(tmp->is_path) out=tmp->cb;
         }
        return out;
