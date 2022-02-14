@@ -4,18 +4,19 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/../libevent-2.1.12-stable/include/",
                 "${workspaceFolder}/include/"
             ],
             "browse": {
-                "path": [  "${workspaceRoot}",
-                    "${workspaceFolder}/../libevent-2.1.12-stable/"]
+                "path": [
+                    "${workspaceRoot}"
+                ]
             },
             "defines": [],
-            "compilerPath": "/usr/bin/g++-9",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "gnu17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "go2sh.cmake-integration"
         }
     ],
     "version": 4

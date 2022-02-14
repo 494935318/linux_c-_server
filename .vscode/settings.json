@@ -23,6 +23,8 @@
         "any": "cpp",
         "list": "cpp",
         "complex": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "string": "cpp",
+        "string_view": "cpp"
     }
 }

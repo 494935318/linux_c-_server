@@ -6,7 +6,7 @@
 			"label": "C/C++: cpp 生成活动文件",
 			"command": "/usr/bin/g++",
 			"args": [
-				// "-O2",
+				"-O2",
 				"-std=c++17",
 				"-pthread",
 				"-fdiagnostics-color=always",
@@ -16,12 +16,8 @@
 				"${workspaceFolder}/include",
 				"-I",
 				"${workspaceFolder}/http_sever",
-				"-I",
-				"${workspaceFolder}/../libevent-2.1.12-stable/include",
 				"-o",
 				"${workspaceFolder}/build/${fileBasenameNoExtension}",
-				"-L",
-				"${workspaceFolder}/../libevent-2.1.12-stable/"
 				
 				
 			],
@@ -36,6 +32,8 @@
 				"isDefault": true
 			},
 			"detail": "编译器: /usr/bin/cpp"
-		}
+		},
+	
 	]
+	
 }
