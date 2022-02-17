@@ -46,7 +46,7 @@ private:
     bool lock(){
         
         int i=pthread_mutex_lock(&m_mutex);
-        assert(i==0);
+        // assert(i==0);
         hold=current_thread_id();
         return i==0;
     }

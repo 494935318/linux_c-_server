@@ -42,15 +42,15 @@ void channel::disable_read()
     event_ &= ~EPOLLIN;
     update();
 }
-void channel::set_error_cb(callback_fun f)
+void channel::set_error_cb(const callback_fun &f)
 {
     erro_cb = f;
 }
-void channel::set_read_cb(callback_fun f)
+void channel::set_read_cb(const callback_fun & f)
 {
     read_cb = f;
 }
-void channel::set_write_cb(callback_fun f)
+void channel::set_write_cb(const callback_fun & f)
 {
     write_cb = f;
 }

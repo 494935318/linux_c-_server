@@ -19,9 +19,9 @@ class channel:noncopyable,public enable_shared_from_this<channel>
     void enable_read();
     void disable_write();
     void disable_read();
-    void set_error_cb(callback_fun f);
-    void set_read_cb(callback_fun f);
-    void set_write_cb(callback_fun f);
+    void set_error_cb(const callback_fun &f);
+    void set_read_cb(const callback_fun & f);
+    void set_write_cb(const callback_fun & f);
     void update();
     void handle_event();
     int get_fd();

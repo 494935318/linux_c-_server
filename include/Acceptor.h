@@ -5,7 +5,7 @@
 class event_loop;
 class channel;
 class TCP_Server;
-typedef function<void(int,sockaddr_in)> accept_cb; 
+typedef function<void(const int&,const sockaddr_in &)> accept_cb; 
 class Acceptor:noncopyable
 {
     public:

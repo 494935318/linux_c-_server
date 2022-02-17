@@ -93,9 +93,9 @@ public:
     {
         return head_data;
     }
-    HTTP_CODE parse_requestion(weak_TCP in)
+    HTTP_CODE parse_requestion(const shared_ptr<TCP_Connect>& tmp)
     {
-        auto tmp = in.lock();
+        // auto tmp = in.lock();
         if (tmp)
         {
             LINE_STATUS linestatus = LINE_OK;

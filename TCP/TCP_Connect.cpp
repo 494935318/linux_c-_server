@@ -1,12 +1,12 @@
 #include "TCP_Connect.h"
 #include "channel.h"
 #include "event_loop.h"
+#include   "log.h"
 locker TCP_list_lock;
 // list<shared_ptr<TCP_Connect>> mem_TCP_list;
 TCP_Connect::TCP_Connect(int fd, event_loop *loop) : fd(fd), loop(loop)
-{   //cout<<"thread_id:"<<loop->get_owner_pid()<<endl;
-    // cout<<"connected:"<<fd;
-    // print_getpeername(fd);
+{   
+    LOG_DEBUG<<"new connected "<<"thread_id:"<<loop->get_owner_pid()<<"  connected:"<<fd <<" address:"<< _getpeername(fd);;
     channel_.reset(new channel(loop, fd));
     on_message = default_on_message;
 };
@@ -174,7 +174,7 @@ void TCP_Connect::close()
     // lock_guard tmp(TCP_list_lock);
     // mem_TCP_list.erase(idx);
     holder.reset();
-    // cout<<"close:"<<fd<<"address";
+    LOG_DEBUG<<"connect on close:"<<fd<<"address:"<<_getpeername(fd);
     // print_getpeername(fd);
 };
 void TCP_Connect::forceclose()
@@ -185,14 +185,14 @@ TCP_Connect::~TCP_Connect()
 {
     //  loop->unregister(channel_.get());
     ::close(fd);
-    // cout << "closed" << endl;
+    LOG_DEBUG<< "connected closed:" << fd;
 };
 
-void TCP_Connect::set_on_message(callback_fun_TCP cb)
+void TCP_Connect::set_on_message(const callback_fun_TCP &cb)
 {
     on_message = cb;
 };
-void TCP_Connect::set_on_close(callback_fun_TCP cb)
+void TCP_Connect::set_on_close(const callback_fun_TCP & cb)
 {
     on_close = cb;
 };

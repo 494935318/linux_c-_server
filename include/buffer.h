@@ -1,11 +1,14 @@
+#ifndef __BUFFER_H__
+#define __BUFFER_H__
+
 #include"utils.h"
 #include<sys/uio.h>
-const int  INIT_SIZE=65535;
-const int PRE_SIZE=8;
+static const int  INIT_SIZE=65535;
+static const int PRE_SIZE=8;
 namespace Buffer{
     
 class Buffer:noncopyable{
-    public: Buffer(int size=INIT_SIZE,int pre_size=PRE_SIZE):read_index(pre_size),write_index(pre_size),buff_(vector<char>(size,'\0')){
+    public: Buffer(int size=INIT_SIZE,int pre_size=PRE_SIZE):presize(pre_size),read_index(pre_size),write_index(pre_size),buff_(vector<char>(size,'\0')){
 
     }
     // 一次性读文文件
@@ -43,8 +46,8 @@ class Buffer:noncopyable{
         clear();
     }
     void retrieve_all(){
-        read_index=PRE_SIZE;
-        write_index=PRE_SIZE;
+        read_index=presize;
+        write_index=presize;
         clear();
     }
     // 收缩buff_大小
@@ -54,8 +57,8 @@ class Buffer:noncopyable{
     // 清除
     bool clear(){
         if(read_index==write_index){
-            read_index=PRE_SIZE;
-            write_index=PRE_SIZE;
+            read_index=presize;
+            write_index=presize;
         }
         // fill(buff_.begin()+PRE_SIZE,buff_.end(),'\0');
     }
@@ -106,30 +109,58 @@ class Buffer:noncopyable{
         return write_index-read_index;
     }
     int prependable_size(){
-        return write_index;
+        return read_index;
     }
-    private:
-    // 重置大小
-    // 乘以二 , 前挪
-    int resize(int num){
-        if( read_index+writeable_size()>num+PRE_SIZE){
-            int tmp=readable_size();
-              copy(&buff_[read_index],&buff_[write_index],&buff_[PRE_SIZE]);
-              read_index=PRE_SIZE;
-              write_index= read_index+tmp;
+    int set_size(int n){
+        buff_.resize(n+presize);
+        if(write_index>buff_.size()){
+            write_index=buff_.size();
         }
-        else{
-             int pre_size=buff_.size();
-           buff_.resize((buff_.size()+num-writeable_size())*2);
-        }
-        return num;
     }
     int writeable_size(){
         return buff_.size()-write_index;
     }  
+    private:
+    // 重置大小
+    // 乘以二 , 前挪
+    
+    int resize(int num){
+        if( read_index+writeable_size()>num+presize){
+            int tmp=readable_size();
+              copy(&buff_[read_index],&buff_[write_index],&buff_[presize]);
+              read_index=presize;
+              write_index= read_index+tmp;
+        }
+        else{
+             int presize=buff_.size();
+           buff_.resize((buff_.size()+num-writeable_size())*2);
+        }
+        return num;
+    }
+    
+   
     bool has_pre=false;
     vector<char> buff_;
     int read_index;
     int write_index;
+    int presize;
 };
+template<int N,int Pre>
+class Fixed_Buffer:public Buffer{
+    public:
+         Fixed_Buffer(int presize=Pre):Buffer(N,presize){
+         }
+         int avail(){
+             return writeable_size();
+         }
+         void write_fd(int fd){
+             write(fd,begin(),readable_size());
+             retrieve_all();
+         }
+         void reset(){
+             retrieve_all();
+         }
+};
+
 }
+#endif // __BUFFER_H__

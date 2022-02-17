@@ -1,9 +1,10 @@
 #include "Acceptor.h"
 #include "event_loop.h"
 #include "channel.h"
+#include "log.h"
 Acceptor::Acceptor(string ip, int port, event_loop *loop, int max_size) : loop(loop), max_size(max_size)
 {
-    addr.reset(get_addr_ipv4(ip.data(), 3026));
+    addr.reset(get_addr_ipv4(ip.data(), port));
     int sock_tmp = socket(AF_INET, SOCK_STREAM, 0);
     int tmp1 = 1;
     setsockopt(sock_tmp, SOL_SOCKET, SO_REUSEADDR, &tmp1, sizeof(tmp1));
@@ -28,29 +29,34 @@ void Acceptor::set_connect_cb(accept_cb cb)
 };
 void Acceptor::handleread()
 {
+    
+    int in_fd = 1;
     sockaddr_in a;
     socklen_t b;
-    int in_fd=1;
-    while(in_fd!=-1)
-    {
-     in_fd = accept4(fd, (sockaddr *)&a, &b, SOCK_CLOEXEC | SOCK_NONBLOCK);
-    if (in_fd!=-1)on_connect(in_fd, a);
-    else
-    {
-        auto save_err = errno;
-        switch (save_err)
-        {
-        case EAGAIN:
-        case EINTR:
-        case EMFILE:
-        case ECONNABORTED:
-            break;
-        default:
-            close(fd);
-            pthread_exit(nullptr);
-            break;
+   
+    while (in_fd != -1)
+    {  
+        b=sizeof(a);
+        in_fd = accept4(fd, (sockaddr *)&a, &b, SOCK_CLOEXEC | SOCK_NONBLOCK);
+        if (in_fd != -1)
+            on_connect(in_fd, a);
+        else
+        {char tmep[256];
+            auto save_err = errno;
+            switch (save_err)
+            {
+            case EAGAIN:
+            case EINTR:
+            case EMFILE:
+            case ECONNABORTED:
+                LOG_DEBUG << strerror_r(save_err,tmep,256);
+                break;
+            default:
+                LOG_ERROR <<  strerror_r(save_err,tmep,256);
+                close(fd);
+                pthread_exit(nullptr);
+                break;
+            }
         }
-    }
-    
     }
 }

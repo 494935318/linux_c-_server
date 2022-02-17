@@ -8,10 +8,10 @@ int run1(int argc, char *argv[])
 {
 
     const char *ip = "127.0.0.1";
-    openlog("run1", LOG_PID | LOG_CONS, LOG_USER);
-    setlogmask(LOG_UPTO(LOG_DEBUG));
-    syslog(LOG_DEBUG, "%s", "test2");
-    closelog();
+    // openlog("run1", LOG_PID | LOG_CONS, LOG_USER);
+    // setlogmask(LOG_UPTO(LOG_DEBUG));
+    // syslog(LOG_DEBUG, "%s", "test2");
+    // closelog();
     auto addr1 = get_addr_ipv4(ip, 2233);
     addr1->sin_family = AF_INET;
     auto addr2 = get_addr_ipv4(ip, 1235);
@@ -102,7 +102,7 @@ void echo(const shared_ptr<TCP_Connect>& a)
 void on_connect(const shared_ptr<TCP_Connect> &a)
 {
     int fd = a->get_fd();
-    print_getpeername(fd);
+    _getpeername(fd);
     cout << "loop_pid_owner:" << a->get_owner_pid() << endl;
     cout << "loop_pid_now:" << current_thread_id() << endl;
     a->send("connected\n");

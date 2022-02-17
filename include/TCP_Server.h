@@ -6,20 +6,20 @@ class event_loop;
 class Acceptor;
 class TCP_Connect;
 class Thread_event_loop;
-typedef function<void(shared_ptr<TCP_Connect>)> server_callback_fun;
+typedef function<void(const shared_ptr<TCP_Connect>&)> server_callback_fun;
 
 class TCP_Server : noncopyable
 {
 public:
-    TCP_Server(event_loop *, string ip, int port, int size = 5);
-    void set_on_connect(server_callback_fun);
-    void set_on_message(server_callback_fun);
+    TCP_Server(event_loop *, const string &ip, int port, int size = 5);
+    void set_on_connect(const server_callback_fun&);
+    void set_on_message(const server_callback_fun&);
     void work();
     void set_threadnum(int size);
     void set_timewheel(timeval);
 private:
     void remove_connect(int fd);
-    void on_new_connect(int, sockaddr_in);
+    void on_new_connect(const int &fd, const sockaddr_in &addr);
     void on_connect_close(const shared_ptr<TCP_Connect>&);
     
 private:

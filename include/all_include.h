@@ -17,7 +17,7 @@
 #include<memory>
 // #include<asm/fcntl.h>
 #include<fcntl.h>
-#include<sys/syslog.h>
+// #include<sys/syslog.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<sys/epoll.h>

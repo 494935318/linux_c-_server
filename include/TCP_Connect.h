@@ -16,7 +16,7 @@ void default_on_message(weak_ptr<TCP_Connect> con);
 void shut_down_inloop(weak_TCP in);
 class TCP_Connect : noncopyable, public enable_shared_from_this<TCP_Connect>
 {
-    typedef function<void(shared_ptr<TCP_Connect>)> callback_fun_TCP;
+    typedef function<void(const shared_ptr<TCP_Connect> &)> callback_fun_TCP;
 
 public:
     TCP_Connect(int fd, event_loop *loop);
@@ -26,9 +26,9 @@ public:
     void forceclose();
     void work();
     ~TCP_Connect();
-    void set_on_message(callback_fun_TCP);
-    void set_on_close(callback_fun_TCP);
-    void set_on_write_finish(callback_fun_TCP cb)
+    void set_on_message(const callback_fun_TCP &);
+    void set_on_close(const callback_fun_TCP &);
+    void set_on_write_finish(const callback_fun_TCP &cb)
     {
         on_writefinish = cb;
     }

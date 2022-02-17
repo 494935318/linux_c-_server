@@ -177,7 +177,10 @@ public:
         }
     }
     friend class event_loop;
-
+    ~timer_fd(){
+        
+        close(time_fd);
+    }
 private:
     locker time_lock;
     void resettimer()
@@ -242,20 +245,23 @@ public:
       
     
 
-    void wakeup();
+     void wakeup();
     void run();
     void stop();
-    int size();
+     int size();
     int get_owner_pid(){
         return owner_thread;
     }
     bool is_in_loopthread();
+    ~event_loop(){
+        close(event_run_fd);
+    }
 private:
     void run_sig();
     void run_event();
     locker mutex_;
     pid_t owner_thread;
-    int event_run_pid;
+    int event_run_fd;
     shared_ptr<channel> time_channel;
     shared_ptr<channel> signal_channel;
     shared_ptr<channel> event_channel;

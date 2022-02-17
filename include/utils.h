@@ -8,8 +8,8 @@ int current_thread_id();
 // sockaddr* get_tcp_address(char * ip,int port);
 sockaddr_in* get_addr_ipv4(const char * ip,int port);
 sockaddr_in6* get_addr_ipv6(const char * ip,int port);
-void print_getsockname(int fd);
-void print_getpeername(int fd);
+string _getsockname(int fd);
+string _getpeername(int fd);
 uint32_t  addfd(int epollfd ,int fd, int ctl=1,bool enable_et=false,bool oneshot=false);
 void removefd(int epollfd,int fd);
 void reset_oneshot(int epollfd,int fd);
@@ -32,4 +32,5 @@ class IgnoreSigPipe{
      
     }
 };
+long long  isfile(const char *filename);
 #endif // __UTILS_H__

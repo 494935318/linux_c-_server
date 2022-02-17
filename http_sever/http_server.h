@@ -16,8 +16,8 @@ class http_server:noncopyable
         void Init(int port,int thread_num=0);
         void start();
         void set_location(string locate, http_cb cb);
-        void on_data(weak_TCP in,const shared_ptr<request> &req);
-         void on_connect(weak_TCP in);
+        void on_data(const shared_ptr<TCP_Connect>& in,const shared_ptr<request> &req);
+         void on_connect(const shared_ptr<TCP_Connect>&tmp);
     private:
         path_tree tree;
         shared_ptr<event_loop> loop;

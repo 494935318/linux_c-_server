@@ -7,7 +7,7 @@ event_loop::event_loop(int size) : size_(size)
 {
     owner_thread = gettid();
     epoller_.reset(new epoller(this));
-    event_run_pid = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+    event_run_fd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
     if (sig_pipefd[0] == -1)
         socketpair(PF_UNIX, SOCK_STREAM, 0, sig_pipefd);
 }
@@ -73,7 +73,7 @@ void event_loop::wakeup()
 {
 
     // cout<<send(event_run_pid,&i,sizeof(i),0)<<endl;
-    eventfd_write(event_run_pid, 1);
+    eventfd_write(event_run_fd, 1);
 }
 void event_loop::run()
 {
@@ -83,7 +83,7 @@ void event_loop::run()
     signal_channel=make_shared<channel>(this, sig_pipefd[1]);
     signal_channel->set_read_cb(bind(&event_loop::run_sig, this));
     signal_channel->enable_read();
-    event_channel=make_shared<channel>(this, event_run_pid);
+    event_channel=make_shared<channel>(this, event_run_fd);
     event_channel->set_read_cb(bind(&event_loop::run_event, this));
     event_channel->enable_read();
     while (is_run)
@@ -136,5 +136,5 @@ void event_loop::run_event()
     int tmp;
     // read(event_run_pid,&tmp,sizeof(tmp));
     eventfd_t count;
-    eventfd_read(event_run_pid, &count);
+    eventfd_read(event_run_fd, &count);
 }

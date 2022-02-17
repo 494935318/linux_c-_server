@@ -44,48 +44,58 @@ sockaddr_in6 *get_addr_ipv6(const char *ip, int port)
     sockaddr *tmp = get_tcp_address(ip, port, true);
     return (sockaddr_in6 *)tmp;
 }
-void print_getsockname(int fd)
+string  _getsockname(int fd)
 {
     sockaddr_in6 in6;
     unsigned int s = sizeof(in6);
     if (getsockname(fd, (sockaddr *)&in6, &s) == -1)
     {
-        cout << "erron" << endl;
-        return;
+        // cout << "erron" << endl;
+        return "erron";
     };
     char a[100];
     memset(a, '\0', 100);
     if (s < sizeof(in6))
     {
-        cout << inet_ntop(AF_INET, &((sockaddr_in *)&in6)->sin_addr, a, 100) << ":" << ntohs(((sockaddr_in *)&in6)->sin_port) << endl;
+         char tmp[256];
+         sprintf(tmp,"%s%s%d", inet_ntop(AF_INET, &((sockaddr_in *)&in6)->sin_addr, a, 100) , ":" , ntohs(((sockaddr_in *)&in6)->sin_port));
+        return tmp;
     }
     else
     {
-        cout << inet_ntop(AF_INET6, &in6.sin6_addr, a, 100) << ":" << ntohs(in6.sin6_port) << endl;
+        char tmp[256];
+        sprintf(tmp,"%s%s%d",inet_ntop(AF_INET6, &in6.sin6_addr, a, 100) , ":" , ntohs(in6.sin6_port));
+        return tmp;
     }
 }
-void print_getpeername(int fd)
+string  _getpeername(int fd)
 {
     sockaddr_in6 in6;
     unsigned int s = sizeof(in6);
     if (getpeername(fd, (sockaddr *)&in6, &s) == -1)
     {
-        cout << "erron" << endl;
-        return;
+        // cout << "erron" << endl;
+         return  "erron";
     };
     char a[100];
     memset(a, '\0', 100);
     if (s < sizeof(in6))
     {
-        cout << inet_ntop(AF_INET, &((sockaddr_in *)&in6)->sin_addr, a, 100) << ":" << ntohs(((sockaddr_in *)&in6)->sin_port) << endl;
+         char tmp[256];
+         sprintf(tmp,"%s%s%d", inet_ntop(AF_INET, &((sockaddr_in *)&in6)->sin_addr, a, 100) , ":" , ntohs(((sockaddr_in *)&in6)->sin_port));
+        return tmp;
     }
     else
     {
-        cout << inet_ntop(AF_INET6, &in6.sin6_addr, a, 100) << ":" << ntohs(in6.sin6_port) << endl;
+       
+        char tmp[256];
+        sprintf(tmp,"%s%s%d",inet_ntop(AF_INET6, &in6.sin6_addr, a, 100) , ":" , ntohs(in6.sin6_port));
+        return tmp;
     }
 }
+
 // 判断是否为文件并返回文件大小,若为-1则文件无效
-int isfile(const char *filename)
+long long isfile(const char *filename)
 {
     struct stat file_stat;
     if (stat(filename, &file_stat) < 0)
@@ -114,12 +124,12 @@ bool set_keepalive(int in_fd, int value)
 int set_nonblock(int in_fd)
 {
     int old_option = fcntl(in_fd, F_GETFL);
-    fcntl(in_fd, F_SETFD, old_option | O_NONBLOCK);
+    fcntl(in_fd, F_SETFL, old_option | O_NONBLOCK);
     return old_option;
 }
 int set_block(int in_fd){
      int old_option = fcntl(in_fd, F_GETFL);
-    fcntl(in_fd, F_SETFD, old_option & ~O_NONBLOCK);
+    fcntl(in_fd, F_SETFL, old_option & ~O_NONBLOCK);
     return old_option;
 }
 uint32_t  addfd(int epollfd ,int fd, int ctl,bool enable_et,bool oneshot)
@@ -186,7 +196,7 @@ bool switch_to_user(uid_t user_id, gid_t gp_id)
     {
         return false;
     }
-    syslog(LOG_DEBUG, "%s%d", "change uid 2 ", user_id);
+    // syslog(LOG_DEBUG, "%s%d", "change uid 2 ", user_id);
     return true;
 }
 void sig_handler(int sig,int fd){
@@ -242,11 +252,7 @@ int recv_fd(int fd){
 
 }
 int current_thread_id(){
-    thread_local int a=-1;
-    if(a==-1){
-        a=gettid();
-        // a=0;
-    }
+   static thread_local int a=gettid();
     return a;
 }
 std::string& trim(std::string &s) 
