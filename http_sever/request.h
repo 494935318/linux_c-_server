@@ -170,7 +170,7 @@ public:
         content.clear();
     }
 private:
-   
+    unordered_map<string, any> context;
     int checked_index = 0;
     int content_length = 0;
     int content_readed = 0;

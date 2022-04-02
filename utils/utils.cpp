@@ -116,6 +116,19 @@ long long isfile(const char *filename)
             return -1;
     }
 }
+bool   isdir(const char *filename){
+struct stat file_stat;
+    if (stat(filename, &file_stat) < 0)
+    {
+        return false;
+    }
+    if (S_ISDIR(file_stat.st_mode))
+        {
+            return true;
+        }
+    return false;
+};
+
 bool set_keepalive(int in_fd, int value)
 {
     // int value=1;

@@ -11,28 +11,36 @@ class Buffer:noncopyable{
     public: Buffer(int size=INIT_SIZE,int pre_size=PRE_SIZE):presize(pre_size),read_index(pre_size),write_index(pre_size),buff_(vector<char>(size,'\0')){
 
     }
-    // 一次性读文文件
+    int writeable_size(){
+        return buff_.size()-write_index;
+    }  
+    //尽量 一次性读文文件
     int read_fd(int fd)
     {   char tmp_mem[65536];
         iovec vec[2];
-        int write_able=buff_.size()-write_index;
+        int all_read=0;
+        while(true){
+        int write_able_=writeable_size();
         
         vec[1].iov_base=&tmp_mem[0];
         vec[1].iov_len=sizeof(tmp_mem);
         vec[0].iov_base=&buff_[write_index];
-        vec[0].iov_len=write_able;
-        
+        vec[0].iov_len=write_able_;
         int  num_read=readv(fd,vec,2);
-        int all_read=num_read;
-        if(num_read>write_able){
-            num_read-=write_able;
+        all_read+=num_read;
+        if(num_read>write_able_){
+            num_read-=write_able_;
             write_index=buff_.size();
             resize(num_read);
            copy(&tmp_mem[0],&tmp_mem[num_read],&buff_[write_index]);
            write_index+=num_read;
+           if(num_read<sizeof(tmp_mem)) break;
         }
         else{
         write_index=write_index+num_read;
+        break;
+        }
+        
         }
         return  all_read;
     }
@@ -88,7 +96,7 @@ class Buffer:noncopyable{
     // 发送一次消息
     //返回剩下的大小
     int sendfd( int fd){
-        cout<<buff_[read_index]<<endl;
+        // cout<<buff_[read_index]<<endl;
       
         int num= send(fd,&buff_[read_index],readable_size(),MSG_DONTWAIT|MSG_NOSIGNAL);
         read_index+=num;
@@ -117,9 +125,7 @@ class Buffer:noncopyable{
             write_index=buff_.size();
         }
     }
-    int writeable_size(){
-        return buff_.size()-write_index;
-    }  
+    
     private:
     // 重置大小
     // 乘以二 , 前挪

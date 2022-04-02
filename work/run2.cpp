@@ -9,7 +9,7 @@ void cb(request &a,response& b){
 }
 
 int main(){
-    // Logger::start_log();
+    Logger::start_log();
     Logger::setLogLevel(Logger::LogLevel::TRACE);
     LOG_DEBUG<<"start:"<<"\n";
     sigset_t signal_mask;
@@ -20,7 +20,7 @@ int main(){
 
     // IgnoreSigPipe();
     http_server serve;
-    serve.Init(3026,5);
+    serve.Init(3026,16);
     serve.set_location("/",cb);
     serve.start();
    

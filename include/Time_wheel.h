@@ -18,7 +18,7 @@ class time_wheel:noncopyable{
     time_wheel(event_loop* loop,timeval peer):loop(loop){
         t_id=loop->runevery(peer,bind(&time_wheel<T>::time_handle,this));
     };
-    void update(T a){
+    void update(shared_ptr<T> a){
         if(loop->is_in_loopthread())
         time_wheel_list.back().push_back(a);
         else{

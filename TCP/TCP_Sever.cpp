@@ -14,6 +14,8 @@ on_connect=cb;
 void TCP_Server::set_on_message(const server_callback_fun& cb){
 on_message=cb;
 };
+
+
 void TCP_Server::on_new_connect(const int &fd, const sockaddr_in &addr){
      shared_ptr<TCP_Connect> con;
     if(!multi_thread)
@@ -23,8 +25,8 @@ void TCP_Server::on_new_connect(const int &fd, const sockaddr_in &addr){
     con=make_shared<TCP_Connect>(fd,loop_idx);}
     con->set_on_message(on_message);
     // sever 记录链接的TCP
-    connect_map[fd]=con;
-    con->set_on_close(bind(&TCP_Server::on_connect_close,this,placeholders::_1));
+    // connect_map[fd]=con;
+    // con->set_on_close(bind(&TCP_Server::on_connect_close,this,placeholders::_1));
 
     // 预备工作
     if(on_connect) on_connect(con);

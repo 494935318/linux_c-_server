@@ -122,14 +122,18 @@ void Logger::init() {
     }
 shared_ptr<Async_loging> Logger::Async_log=0;
 log_file::log_file()
-{
+{   static int id=0;
     // time_t t = time(NULL);
+    id=id%10000;
     struct timeval now = {0, 0};
     gettimeofday(&now, NULL);
     time_t t = now.tv_sec;
     localtime_r(&t, &my_tm);
     char tail[256] = {'\0'};
-    sprintf(tail,  "./%s%dy%02dm%02dd%02dh%02dm%02ds.log", exec_name.c_str(), my_tm.tm_year + 1900, my_tm.tm_mon + 1, my_tm.tm_mday, my_tm.tm_hour, my_tm.tm_min, my_tm.tm_sec);
+    if(!isdir("./log")){
+        mkdir("./log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    }
+    sprintf(tail, "./log/%s%dy%02dm%02dd%02dh%02dm%02ds_%d.log", exec_name.c_str(), my_tm.tm_year + 1900, my_tm.tm_mon + 1, my_tm.tm_mday, my_tm.tm_hour, my_tm.tm_min, my_tm.tm_sec,id++);
     f = fopen(tail, "a");
     f_size = 0;
 };
@@ -168,7 +172,8 @@ void Async_loging::append(const char *a, int len)
         Current_buffer->append(a, len);
     }
     else
-    {
+    {   if(Current_buffer)
+        fullBuffers.push_back(Current_buffer);
 
         {
             lock_guard empty_guard(empty_mutex);

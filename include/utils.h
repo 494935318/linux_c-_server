@@ -33,4 +33,5 @@ class IgnoreSigPipe{
     }
 };
 long long  isfile(const char *filename);
+bool isdir(const char *filename);
 #endif // __UTILS_H__

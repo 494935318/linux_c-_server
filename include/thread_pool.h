@@ -73,17 +73,19 @@ template <class T>
 void thread_pool<T>::run()
 {
     while(! m_stop)
-    {   
+    {   T* request;
         m_queuestat.wait();
+        {
         lock_guard tmp(m_queuelocker);
         if(m_workqueue.empty())
         {
             
             continue;
         }
-        T* request=m_workqueue.front();
+        request=m_workqueue.front();
         m_workqueue.pop_front();
-        tmp.unlock();
+        }
+       
         if(! request){
             continue;
         }
@@ -91,5 +93,30 @@ void thread_pool<T>::run()
 
     }
 }
+
+typedef function<void ()> cb;
+class thread_work{
+    public:
+    thread_work(const cb &c):c1(c){
+    }
+   void  process(){
+        c1();
+        delete this;
+    }
+    private:
+    cb c1;
+};
+class fun_thread_pool{
+    public:
+    fun_thread_pool(int f):pool(thread_pool<thread_work>(f)) {
+
+    }
+    void append(const cb& c ){
+        pool.append(new thread_work(c));
+    }
+    private:
+    thread_pool<thread_work> pool;
+}
+;
 #endif // __THREAD_POOL_H__
 
